@@ -1,46 +1,53 @@
 import React, {useEffect, useState} from 'react'
-import axios from "axios";
-
-const ACCOUNT_API_BASE_URL = 'http://localhost:8080/v1/accounts';
-
-const getActualAccountResponse = () => {
-    return axios.get(`${ACCOUNT_API_BASE_URL}`, {
-        headers: {
-            'Authorization': `${localStorage.getItem("Authorization")}`
-        }
-    });
-}
+import {Button} from "@mui/material";
+import {useNavigate} from "react-router-dom";
+import {getActualAccountRequest} from "../../service/ApiService";
 
 export const ProfilePage = () => {
-    const [loading, setLoading] = useState(true);
-    const [account, setActualAccount] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [account, setActualAccount] = useState({
+        id: 0,
+        email: '',
+        role: '',
+        status: '',
+    });
+    const [err, setError] = useState(null);
 
     useEffect(() => {
         getActualAccount()
-    }, [])
+    }, []);
+
+    let handleNavigateToLoginPage = useNavigate();
 
     const getActualAccount = () => {
-        getActualAccountResponse()
+        getActualAccountRequest()
             .then((res) => {
                 setLoading(true);
                 setActualAccount(res.data)
                 console.log(res.data)
                 setLoading(false);
-            }).catch(err => {
-            console.log(err.message)
+            }).catch(error => {
+            let errorResponse = error.response.data;
+            console.log(errorResponse)
+            setError(errorResponse)
+            if (error.response.status === 401) {
+                handleNavigateToLoginPage('/login')
+            }
         })
     }
 
     return (
         <div>
             {loading && <div>Loading...</div>}
-            {!loading && (
+            {!err && !loading && (
                 <div>
-                    <h2>{account.email}</h2>
-                    <h2>{account.role}</h2>
-                    <h2>{account.status}</h2>
+                    <h2>Your email: <span style={{color: "mediumpurple"}}>{account.email}</span></h2>
+                    <h2>Your user role: <span style={{color: 'brown'}}>{account.role}</span></h2>
+                    <h2>Your user status: <span style={{color: 'green'}}>{account.status}</span></h2>
+                    <Button>Edit</Button>
                 </div>
             )}
+            {err && <div>{err.message}</div>}
         </div>
     );
 }

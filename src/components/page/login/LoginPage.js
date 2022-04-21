@@ -1,43 +1,48 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Button, TextField} from "@mui/material";
-import {NavLink} from "react-router-dom";
-import axios from "axios";
-
-const ACCOUNT_API_BASE_URL = 'http://localhost:8080/v1/accounts';
-
-const loginRequest = (payload) => {
-    return axios.post(`${ACCOUNT_API_BASE_URL}/authorization`, payload);
-}
+import {NavLink, useNavigate} from "react-router-dom";
+import {loginRequest} from "../../service/ApiService";
 
 export const LoginPage = () => {
 
-    const initLoginState = {
-        email: "",
-        password: ""
-    }
+    const [login, setLogin] = useState({
+        email: '',
+        password: ''
+    });
 
-    const [login, setLogin] = useState(initLoginState);
+    let handleRedirect = useNavigate();
+
+    useEffect(() => {
+        isAuthorized();
+    }, [])
+
+    const isAuthorized = () => {
+        if (localStorage.getItem('Authorization') !== null) {
+            handleRedirect('/profile')
+        }
+    }
 
     const handleInputChange = event => {
         const {name, value} = event.target;
-        // console.log(name, value, 'event.target')
+        console.log(name, value, 'event.target')
         setLogin({...login, [name]: value});
     };
+
 
     const handleLogin = () => {
         let data = {
             email: login.email,
             password: login.password
         };
-
         loginRequest(data)
             .then(resp => {
-                console.log(resp.headers.authorization)
-                // console.log(resp.data.message);
                 localStorage.setItem("Authorization", resp.headers.authorization)
-                // console.log(resp.data)
+                console.log(resp.status)
+                if (resp.status === 200) {
+                    handleRedirect('/profile');
+                }
             }).catch(err => {
-            console.log(err.response.data)
+            console.log(err.message)
         })
     }
 

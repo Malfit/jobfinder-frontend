@@ -1,27 +1,20 @@
 import React, {useState} from 'react'
 import {Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField} from "@mui/material";
-import axios from "axios";
-
-const ACCOUNT_API_BASE_URL = 'http://localhost:8080/v1/accounts';
-
-const signUpRequest = (payload) => {
-    return axios.post(`${ACCOUNT_API_BASE_URL}`, payload);
-}
+import {NavLink} from "react-router-dom";
+import {signUpRequest} from "../../service/ApiService";
 
 export const SignUpPage = () => {
+    const [account, setAccount] = useState({
+        email: '',
+        password: '',
+        role: '',
+    });
 
-    const initAccountState = {
-        email: "",
-        password: "",
-        role: "",
-    }
-
-    const [account, setAccount] = useState(initAccountState);
     const [submitted, setSubmitted] = useState(false);
 
     // useEffect(() => {
     //     console.log(account)
-    // }, [account]) -- log changes of account.
+    // }, [account]) // log changes of account.
 
     const handleInputChange = event => {
         const {name, value} = event.target;
@@ -39,6 +32,7 @@ export const SignUpPage = () => {
                 setSubmitted(true);
                 console.log(resp.data);
             }).catch(e => {
+            setSubmitted(false)
             console.log(e.response.data)
         })
     }
@@ -81,7 +75,15 @@ export const SignUpPage = () => {
                     </RadioGroup>
                 </FormControl>
             </div>
-            <Button variant="contained" color="primary" onClick={saveAccount}>Продовжити</Button>
+            {!submitted ?
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={saveAccount}>
+                    Продовжити
+                </Button>
+                : <NavLink to="/login">Залогуватись</NavLink>
+            }
         </div>
     );
 }
