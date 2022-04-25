@@ -18,11 +18,11 @@ export const Activation = () => {
 
     const sendToken = () => {
         sendActivationRequest(params.token)
-            .then(resp => {
+            .then(resp => { // .then({ data }) => { use destructurization
                 setMessage(resp.data.message)
-                console.log(message);
+                console.log(message); // console.log should be remove
             }).catch(e => {
-            console.log(e.response.data)
+            console.log(e.response.data) // console.error better
         })
     }
 
