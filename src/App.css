@@ -5,3 +5,7 @@
 .signup-input {
     margin-bottom: 15px;
 }
+
+.error-message{
+    color: darkred;
+}

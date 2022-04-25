@@ -1,7 +1,7 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField} from "@mui/material";
-import {NavLink} from "react-router-dom";
-import {signUpRequest} from "../../service/ApiService";
+import {NavLink, useNavigate} from "react-router-dom";
+import {isAuthorized, signUpRequest} from "../../service/ApiService";
 
 export const SignUpPage = () => {
     const [account, setAccount] = useState({
@@ -11,29 +11,33 @@ export const SignUpPage = () => {
     });
 
     const [submitted, setSubmitted] = useState(false);
-
+    const [error, setError] = useState({
+        details: []
+    })
     // useEffect(() => {
     //     console.log(account)
     // }, [account]) // log changes of account.
+
+    let handleRedirect = useNavigate();
+
+    useEffect(() => {
+        isAuthorized(handleRedirect)
+    })
 
     const handleInputChange = event => {
         const {name, value} = event.target;
         console.log(name, value, 'event.target')
         setAccount({...account, [name]: value});
     };
+
     const saveAccount = () => {
-        let data = {
-            email: account.email,
-            password: account.password,
-            role: account.role
-        };
-        signUpRequest(data)
+        signUpRequest(account)
             .then(resp => {
                 setSubmitted(true);
-                console.log(resp.data);
-            }).catch(e => {
+            }).catch(err => {
+            console.log(err.response.data)
+            setError(err)
             setSubmitted(false)
-            console.log(e.response.data)
         })
     }
 
@@ -84,6 +88,14 @@ export const SignUpPage = () => {
                 </Button>
                 : <NavLink to="/login">Залогуватись</NavLink>
             }
+            <div>
+                {error.details.length > 0
+                    ? error.details.map(detail =>
+                        <strong className='error-message'>{detail.issue}</strong>
+                    )
+                    : ''
+                }
+            </div>
         </div>
     );
 }

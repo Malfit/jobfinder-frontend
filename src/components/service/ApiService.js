@@ -25,3 +25,9 @@ export const patchAccountRequest = (patchBody) => {
         }
     });
 }
+
+export const isAuthorized = (handleRedirect) => {
+    if (localStorage.getItem('Authorization') !== null) {
+        handleRedirect('/profile')
+    }
+}

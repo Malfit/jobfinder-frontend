@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Button, TextField} from "@mui/material";
 import {NavLink, useNavigate} from "react-router-dom";
-import {loginRequest} from "../../service/ApiService";
+import {isAuthorized, loginRequest} from "../../service/ApiService";
 
 export const LoginPage = () => {
 
@@ -9,18 +9,20 @@ export const LoginPage = () => {
         email: '',
         password: ''
     });
+    const [error, setError] = useState({
+        timestamp: 0,
+        id: '',
+        status: 0,
+        message: '',
+        path: ''
+    });
 
     let handleRedirect = useNavigate();
 
     useEffect(() => {
-        isAuthorized();
+        isAuthorized(handleRedirect);
     }, [])
 
-    const isAuthorized = () => {
-        if (localStorage.getItem('Authorization') !== null) {
-            handleRedirect('/profile')
-        }
-    }
 
     const handleInputChange = event => {
         const {name, value} = event.target;
@@ -30,19 +32,17 @@ export const LoginPage = () => {
 
 
     const handleLogin = () => {
-        let data = {
-            email: login.email,
-            password: login.password
-        };
-        loginRequest(data)
+        loginRequest(login)
             .then(resp => {
                 localStorage.setItem("Authorization", resp.headers.authorization)
-                console.log(resp.status)
                 if (resp.status === 200) {
                     handleRedirect('/profile');
                 }
             }).catch(err => {
-            console.log(err.message)
+            console.log(err.response.data)
+            console.log(err.response.data.message)
+            setError(err.response.data)
+            return
         })
     }
 
@@ -74,6 +74,9 @@ export const LoginPage = () => {
             >
                 Увійти
             </Button>
+            <div>
+                {error.message === '' ? '' : <strong className='error-message'>{error.message}</strong>}
+            </div>
             <br/>
             <NavLink to="/signup">Реєстрація</NavLink>
         </div>
