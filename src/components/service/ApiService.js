@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios from "axios"; // create folder api insteaf of service 
+// use this file only for working with api
 
 const ACCOUNT_API_BASE_URL = 'http://localhost:8080/v1/accounts';
 
